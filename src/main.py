@@ -5,68 +5,50 @@ import page_generator
 
 # Paths
 markdown_folder = './content/'
+static_folder = "./static/"
 markdown_file = './content/index.md'
-template_file = './template.html'
+template_file_path = './template.html'
 public_folder = './public/'
 
 def main():
     load_static_files()
 
+# Wrapping function for loading static files and generating pages.
+def directory_traversal(func):
+    def wrapper(src, dest):
+        dir_content = os.listdir(src)
+        while len(dir_content) != 0:
+            next_file = dir_content.pop()
+            next_file_path = src + next_file
+            if os.path.isfile(next_file_path):
+                func(next_file_path,dest)
+                
+            else:
+                next_src = src + next_file + '/'
+                next_dest = dest + next_file + '/'
+                if not os.path.exists(next_dest):
+                    os.mkdir(next_dest)
+                wrapper(next_src,next_dest)
+    return wrapper
 
-def load_static_files(src='static/',dest='public/'):
-    if os.path.exists(dest):
-        shutil.rmtree(dest)
-    os.mkdir(dest)
-    copy_static_file(src,dest)
-    # index_destination_path = './public/index.html'
-    # page_generator.generate_page(from_path=markdown_file,template_path=template_file,dest_path=index_destination_path)
-    generate_page_content()
+@directory_traversal
+def copy_static_file(file_path,dest):
+    shutil.copy(file_path,dest)
     
-def generate_page_content(src=markdown_folder,dest=public_folder):
-    dir_content = os.listdir(src)
-    while len(dir_content) != 0:
-        next_file = dir_content.pop()
-        # Get the next file in the current folder
-        next_file_path = src + next_file
-        print('Next file: ', next_file_path)
-        # Check if it's a file
-        if os.path.isfile(next_file_path):
-            # print('Found a file: ', next_file_path)
-            # if file (md), generate the page
-#             print(f"""Generating page with these informations:
-# Source:{next_file}
-# Destination:{dest}
-# """)
-            page_generator.generate_page(from_path=next_file_path,template_path=template_file,dest_path=f"{dest}index.html")
-            
-        else:
-            # if dir, go into that dir and repeat with next_file
-            next_src = src + next_file + '/'
-            next_dest = dest + next_file + '/'
-            if not os.path.exists(next_dest):
-                os.mkdir(next_dest)
-            generate_page_content(next_src,next_dest)
-            
-def copy_static_file(source, dest):
-    dir_content = os.listdir(source)
-    while len(dir_content) != 0:
-        next_file = dir_content.pop()
-        # Get the next file in the current folder
-        next_file_path = source + next_file
-        # print('Next file: ', next_file_path)
-        # Check if it's a file
-        if os.path.isfile(next_file_path):
-            # print('Found a file: ', next_file_path)
-            # if file, copy
-            shutil.copy(next_file_path,dest)
-            
-        else:
-            # if dir, go into that dir and repeat with next_file
-            next_src = source + next_file + '/'
-            next_dest = dest + next_file + '/'
-            if not os.path.exists(next_dest):
-                os.mkdir(next_dest)
-            copy_static_file(next_src,next_dest)
+@directory_traversal
+def generate_page_content(file_path,dest):
+    page_generator.generate_page(
+        from_path=file_path,
+        template_path=template_file_path,
+        dest_path=f"{dest}index.html"
+    )
+
+def load_static_files():
+    if os.path.exists(public_folder):
+        shutil.rmtree(public_folder)
+    os.mkdir(public_folder)
+    copy_static_file(static_folder,public_folder)
+    generate_page_content(markdown_folder,public_folder)
     
     
 main()
