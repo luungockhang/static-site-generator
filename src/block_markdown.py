@@ -17,7 +17,7 @@ def markdown_to_blocks(text):
     blocks = text.split('\n\n')
     for i in range(len(blocks)):
         block = blocks[i].strip()
-        print(f"Block {i} before: ",block)
+        #print(f"Block {i} before: ",block)
         if block == "":
             continue
         lines = block.split('\n')
@@ -111,7 +111,7 @@ def text_to_children(text):
     children = []
     for node in text_nodes:
         children.append(textnode.text_node_to_html_node(node))
-    print(children)
+    #print(children)
     return children
 
 # Create HTMLNode for heading block
@@ -132,7 +132,7 @@ def create_code_node(block):
     
     code_content = parts[1]
     
-    print('Code content:',code_content)
+    #print('Code content:',code_content)
     text_node = textnode.TextNode(code_content,textnode.TextType.TEXT)
     code_content_node = textnode.text_node_to_html_node(text_node)
     code_node = htmlnode.ParentNode(tag="code",children=[code_content_node])

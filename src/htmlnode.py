@@ -59,7 +59,7 @@ class ParentNode(HTMLNode):
             raise ValueError("Error: Parent node must have children")
         child_html = ""
         for child in self.children:
-            print("Child: ",child)
+            #print("Child: ",child)
             child_html += child.to_html()
         return f"<{self.tag}{self.props_to_html()}>{child_html}</{self.tag}>"
 
