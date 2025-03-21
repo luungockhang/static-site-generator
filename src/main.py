@@ -2,13 +2,14 @@ import re
 import os
 import shutil
 import page_generator
+from pathlib import Path
 
 # Paths
-markdown_folder = './content/'
-static_folder = "./static/"
-markdown_file = './content/index.md'
-template_file_path = './template.html'
-public_folder = './public/'
+markdown_folder = Path('./content/')
+static_folder = Path("./static/")
+markdown_file = Path('./content/index.md')
+template_file_path = Path('./template.html')
+public_folder = Path('./public/')
 
 def main():
     load_static_files()
@@ -16,18 +17,24 @@ def main():
 # Wrapping function for loading static files and generating pages.
 def directory_traversal(func):
     def wrapper(src, dest):
-        dir_content = os.listdir(src)
+        # Convert paths to Path objects
+        src_path = Path(src)
+        dest_path = Path(dest)
+        
+        dir_content = os.listdir(src_path)
         while len(dir_content) != 0:
             next_file = dir_content.pop()
-            next_file_path = src + next_file
-            if os.path.isfile(next_file_path):
-                func(next_file_path,dest)
+            next_file_path = src_path / next_file # Using the / operator of Path object
+            if next_file_path.is_file(): # Path method to check if it's file
+                func(next_file_path,dest_path)
                 
             else:
-                next_src = src + next_file + '/'
-                next_dest = dest + next_file + '/'
-                if not os.path.exists(next_dest):
-                    os.mkdir(next_dest)
+                next_src = src_path / next_file
+                next_dest = dest_path / next_file
+
+                # Create dir if not exist
+                next_dest.mkdir(exist_ok=True) # Path method to create dir
+                
                 wrapper(next_src,next_dest)
     return wrapper
 
@@ -40,8 +47,23 @@ def generate_page_content(file_path,dest):
     page_generator.generate_page(
         from_path=file_path,
         template_path=template_file_path,
-        dest_path=f"{dest}index.html"
+        dest_path= dest / "index.html"
     )
+
+
+def generate_page_recursive(src_dir_path, template_path, dest_dir_path):
+    for entry in os.listdir(src_dir_path):
+        source_path = os.path.join(src_dir_path, entry)
+        dest_path = os.path.join(dest_dir_path, entry)
+        
+        if os.path.isfile(source_path) and source_path.endswith(".md"):
+            # Generate HTML for markdown files
+            html_dest = os.path.join(dest_dir_path,entry.replace(".md",".html"))
+            page_generator.generate_page(source_path, template_file_path,dest_path)
+        elif os.path.isdir(source_path):
+            if not os.path.exists(dest_path):
+                os.makedirs(dest_path)
+            generate_page_recursive(source_path, template_path, dest_path)
 
 def load_static_files():
     if os.path.exists(public_folder):

@@ -1,6 +1,7 @@
 import block_markdown
 import htmlnode
-
+import os
+from pathlib import Path
 
 def extract_title(markdown):
     if len(markdown) == 0:
@@ -32,4 +33,3 @@ def generate_page(from_path='', template_path='', dest_path=''):
     
     with open(dest_path, 'w') as file:
         file.write(page_content)
-        
