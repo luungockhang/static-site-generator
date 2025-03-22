@@ -16,7 +16,7 @@ def extract_title(markdown):
     
     return title_line.lstrip('#').strip()
 
-def generate_page(from_path='', template_path='', dest_path=''):
+def generate_page(from_path='', template_path='', dest_path='', BASEPATH=''):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
     md_content = ''
     with open(from_path, 'r') as file:
@@ -30,6 +30,8 @@ def generate_page(from_path='', template_path='', dest_path=''):
     title = extract_title(md_content)
     page_content = page_content.replace("{{ Content }}", html_string)
     page_content = page_content.replace("{{ Title }}", title)
+    page_content = page_content.replace('href="/', f'href="{BASEPATH}')
+    page_content = page_content.replace('src="/', f'src="{BASEPATH}')
     
     with open(dest_path, 'w') as file:
         file.write(page_content)
